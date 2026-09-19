@@ -2,6 +2,7 @@ import { useState } from "react";
 import { usePostList } from "../store/post-list-store";
 import { useUserProfile } from "../store/UserProfileContext";
 import { useChat } from "../store/ChatContext";
+import { useNotifications } from "../store/NotificationsContext";
 import {
   MdHome,
   MdAddCircleOutline,
@@ -15,6 +16,7 @@ import {
   MdEdit,
   MdChatBubbleOutline,
   MdHowToVote,
+  MdNotificationsNone,
 } from "react-icons/md";
 import { RiSparklingFill } from "react-icons/ri";
 
@@ -22,6 +24,7 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
   const { postList, setActiveFeedTab } = usePostList();
   const { profile } = useUserProfile();
   const { totalUnreadCount } = useChat();
+  const { unreadCount: notificationsUnreadCount } = useNotifications();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const bookmarkedCount = postList.filter((p) => p.bookmarked).length;
@@ -97,6 +100,19 @@ const Sidebar = ({ selectedTab, setSelectedTab }) => {
             <span className="sidebar-nav-label">Polls & Debates</span>
             {pollsCount > 0 && (
               <span className="sidebar-pill-badge">{pollsCount}</span>
+            )}
+          </button>
+        </li>
+
+        <li className="sidebar-nav-item" role="listitem">
+          <button
+            className={`sidebar-nav-link ${selectedTab === "Notifications" ? "active" : ""}`}
+            onClick={() => handleNavClick("Notifications")}
+          >
+            <span className="sidebar-nav-icon"><MdNotificationsNone /></span>
+            <span className="sidebar-nav-label">Notifications</span>
+            {notificationsUnreadCount > 0 && (
+              <span className="sidebar-pill-badge badge-unread">{notificationsUnreadCount}</span>
             )}
           </button>
         </li>

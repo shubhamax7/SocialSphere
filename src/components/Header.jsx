@@ -2,24 +2,19 @@ import { useState } from "react";
 import { useSearch } from "../store/SearchContext";
 import { useToast } from "./Toast";
 import { useChat } from "../store/ChatContext";
-import { FiSearch, FiBell, FiX, FiCheck, FiMessageSquare } from "react-icons/fi";
+import { useNotifications } from "../store/NotificationsContext";
+import { FiSearch, FiBell, FiX, FiCheck, FiMessageSquare, FiArrowRight } from "react-icons/fi";
 import { RiSparklingFill } from "react-icons/ri";
-
-const NOTIFICATIONS = [
-  { id: 1, text: "Elena Vance liked your post on React 19", time: "2m ago" },
-  { id: 2, text: "Marcus Brody commented: 'Browser automation is a game changer!'", time: "18m ago" },
-  { id: 3, text: "Sarah Jenkins started following your sphere", time: "1h ago" },
-];
 
 const Header = ({ setSelectedTab }) => {
   const { searchQuery, setSearchQuery } = useSearch();
   const { showToast } = useToast();
   const { totalUnreadCount, setIsChatDrawerOpen, setIsChatDrawerMinimized } = useChat();
+  const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotifications();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3);
 
   const handleClearNotifications = () => {
-    setUnreadCount(0);
+    markAllAsRead();
     showToast({
       type: "info",
       title: "Notifications cleared",
@@ -93,15 +88,50 @@ const Header = ({ setSelectedTab }) => {
                 )}
               </div>
               <div className="flyout-list">
-                {NOTIFICATIONS.map((n) => (
-                  <div key={n.id} className="flyout-item">
-                    <span className="flyout-item-dot" />
-                    <div className="flyout-item-body">
-                      <p className="flyout-item-text">{n.text}</p>
-                      <span className="flyout-item-time">{n.time}</span>
+                {notifications.length === 0 ? (
+                  <div className="flyout-empty">No notifications yet</div>
+                ) : (
+                  notifications.slice(0, 5).map((n) => (
+                    <div
+                      key={n.id}
+                      className={`flyout-item ${!n.read ? "unread" : ""}`}
+                      onClick={() => {
+                        if (!n.read) markAsRead(n.id);
+                        if (setSelectedTab) {
+                          setSelectedTab("Notifications");
+                          setShowNotifications(false);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <span className={`flyout-item-dot ${!n.read ? "unread-glow" : ""}`} />
+                      <div className="flyout-item-body">
+                        <p className="flyout-item-text">
+                          <strong>{n.actor.name}</strong> {n.actionText}
+                        </p>
+                        {n.targetSnippet && (
+                          <span className="flyout-item-snippet">{n.targetSnippet}</span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
+              </div>
+              <div className="flyout-footer">
+                <button
+                  type="button"
+                  className="btn-flyout-view-all"
+                  onClick={() => {
+                    if (setSelectedTab) {
+                      setSelectedTab("Notifications");
+                    }
+                    setShowNotifications(false);
+                  }}
+                >
+                  <span>Open Notifications Center</span>
+                  <FiArrowRight />
+                </button>
               </div>
             </div>
           )}
